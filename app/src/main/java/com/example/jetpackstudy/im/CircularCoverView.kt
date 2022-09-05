@@ -1,61 +1,45 @@
-package com.example.jetpackstudy.im;
+package com.example.jetpackstudy.im
 
-import android.annotation.SuppressLint;
-import android.content.Context;
-import android.content.res.TypedArray;
-import android.graphics.Bitmap;
-import android.graphics.Canvas;
-import android.graphics.Paint;
-import android.graphics.PorterDuff;
-import android.graphics.PorterDuffXfermode;
-import android.graphics.RectF;
-import android.os.Build;
-import android.util.AttributeSet;
-import android.view.View;
+import kotlin.jvm.JvmOverloads
+import android.os.Build
+import android.annotation.SuppressLint
+import android.content.Context
+import android.content.res.TypedArray
+import android.graphics.*
+import android.util.AttributeSet
+import android.view.View
+import androidx.annotation.ColorInt
+import androidx.annotation.RequiresApi
+import com.example.jetpackstudy.R
+import java.lang.Error
 
-import androidx.annotation.ColorInt;
-import androidx.annotation.RequiresApi;
-
-import com.example.jetpackstudy.R;
-
-public class CircularCoverView extends View {
-
-    private int leftTopRadians = 30;        //leftTopRadians
-    private int leftBottomRadians = 30;     //leftBottomRadians
-    private int rightTopRadians = 30;       //rightTopRadians
-    private int rightBottomRadians = 30;    //rightBottomRadians
-    private int border = 0;
-
-    private int coverColor = 0xffeaeaea;    //color of cover.
-
-    public CircularCoverView(Context context) {
-        this(context, null, 0);
-    }
-
-    public CircularCoverView(Context context, AttributeSet attrs) {
-        this(context, attrs, 0);
-    }
-
-    public CircularCoverView(Context context, AttributeSet attrs, int defStyleAttr) {
-        super(context, attrs, defStyleAttr);
-
-        TypedArray typedArray = context.obtainStyledAttributes(attrs, R.styleable.CircularCoverView);
-        leftTopRadians = typedArray.getDimensionPixelSize(R.styleable.CircularCoverView_left_top_radius, leftTopRadians);
-        leftBottomRadians = typedArray.getDimensionPixelSize(R.styleable.CircularCoverView_left_bottom_radius, leftBottomRadians);
-        rightTopRadians = typedArray.getDimensionPixelSize(R.styleable.CircularCoverView_right_top_radius, rightTopRadians);
-        rightBottomRadians = typedArray.getDimensionPixelSize(R.styleable.CircularCoverView_right_bottom_radius, rightBottomRadians);
-        coverColor = typedArray.getColor(R.styleable.CircularCoverView_cover_color, coverColor);
-    }
+class CircularCoverView @JvmOverloads constructor(
+    context: Context,
+    attrs: AttributeSet? = null,
+    defStyleAttr: Int = 0
+) : View(context, attrs, defStyleAttr) {
+    private var leftTopRadians = 30 //leftTopRadians
+    private var leftBottomRadians = 30 //leftBottomRadians
+    private var rightTopRadians = 30 //rightTopRadians
+    private var rightBottomRadians = 30 //rightBottomRadians
+    private var border = 0
+    private var coverColor = -0x151516 //color of cover.
 
     /**
      * set radians of cover.
      */
-    public void setRadians(int leftTopRadians, int rightTopRadians, int leftBottomRadians, int rightBottomRadians,int border) {
-        this.leftTopRadians = leftTopRadians;
-        this.rightTopRadians = rightTopRadians;
-        this.leftBottomRadians = leftBottomRadians;
-        this.rightBottomRadians = rightBottomRadians;
-        this.border = border;
+    fun setRadians(
+        leftTopRadians: Int,
+        rightTopRadians: Int,
+        leftBottomRadians: Int,
+        rightBottomRadians: Int,
+        border: Int
+    ) {
+        this.leftTopRadians = leftTopRadians
+        this.rightTopRadians = rightTopRadians
+        this.leftBottomRadians = leftBottomRadians
+        this.rightBottomRadians = rightBottomRadians
+        this.border = border
     }
 
     /**
@@ -63,8 +47,8 @@ public class CircularCoverView extends View {
      *
      * @param coverColor cover's color
      */
-    public void setCoverColor(@ColorInt int coverColor) {
-        this.coverColor = coverColor;
+    fun setCoverColor(@ColorInt coverColor: Int) {
+        this.coverColor = coverColor
     }
 
     /**
@@ -74,17 +58,44 @@ public class CircularCoverView extends View {
      * @param h height of bitmap
      * @return bitmap
      */
-    private Bitmap drawSector(int w, int h) {
-        Bitmap bm = Bitmap.createBitmap(w, h, Bitmap.Config.ARGB_8888);
-        Canvas c = new Canvas(bm);
-        Paint p = new Paint(Paint.ANTI_ALIAS_FLAG);
-        p.setColor(0xFFFFCC44);//notice:cannot set transparent color here.otherwise cannot clip at final.
-
-        c.drawArc(new RectF(border, border, leftTopRadians * 2+border, leftTopRadians * 2+border), 180, 90, true, p);
-        c.drawArc(new RectF(border, getHeight() - leftBottomRadians * 2-border, leftBottomRadians * 2+border, getHeight()-border), 90, 90, true, p);
-        c.drawArc(new RectF(getWidth() - rightTopRadians * 2-border, border, getWidth()-border, rightTopRadians * 2+border), 270, 90, true, p);
-        c.drawArc(new RectF(getWidth() - rightBottomRadians * 2-border, getHeight() - rightBottomRadians * 2-border, getWidth()-border, getHeight()-border), 0, 90, true, p);
-        return bm;
+    private fun drawSector(w: Int, h: Int): Bitmap {
+        val bm = Bitmap.createBitmap(w, h, Bitmap.Config.ARGB_8888)
+        val c = Canvas(bm)
+        val p = Paint(Paint.ANTI_ALIAS_FLAG)
+        p.color = -0x33bc //notice:cannot set transparent color here.otherwise cannot clip at final.
+        c.drawArc(
+            RectF(
+                border.toFloat(),
+                border.toFloat(),
+                (leftTopRadians * 2 + border).toFloat(),
+                (leftTopRadians * 2 + border).toFloat()
+            ), 180f, 90f, true, p
+        )
+        c.drawArc(
+            RectF(
+                border.toFloat(),
+                (height - leftBottomRadians * 2 - border).toFloat(),
+                (leftBottomRadians * 2 + border).toFloat(),
+                (height - border).toFloat()
+            ), 90f, 90f, true, p
+        )
+        c.drawArc(
+            RectF(
+                (width - rightTopRadians * 2 - border).toFloat(),
+                border.toFloat(),
+                (width - border).toFloat(),
+                (rightTopRadians * 2 + border).toFloat()
+            ), 270f, 90f, true, p
+        )
+        c.drawArc(
+            RectF(
+                (width - rightBottomRadians * 2 - border).toFloat(),
+                (height - rightBottomRadians * 2 - border).toFloat(),
+                (width - border).toFloat(),
+                (height - border).toFloat()
+            ), 0f, 90f, true, p
+        )
+        return bm
     }
 
     /**
@@ -94,47 +105,92 @@ public class CircularCoverView extends View {
      * @param h height of bitmap
      * @return bitmap
      */
-    private Bitmap drawRect(int w, int h) {
-        Bitmap bm = Bitmap.createBitmap(w, h, Bitmap.Config.ARGB_8888);
-        Canvas c = new Canvas(bm);
-        Paint p = new Paint(Paint.ANTI_ALIAS_FLAG);
-        p.setColor(coverColor);
-
-        c.drawRect(new RectF(border, border, leftTopRadians+border, leftTopRadians+border), p);
-        c.drawRect(new RectF(border, getHeight() - leftBottomRadians-border, leftBottomRadians+border, getHeight()-border), p);
-        c.drawRect(new RectF(getWidth() - rightTopRadians-border, border, getWidth()-border, rightTopRadians+border), p);
-        c.drawRect(new RectF(getWidth() - rightBottomRadians-border, getHeight() - rightBottomRadians-border, getWidth()-border, getHeight()-border), p);
-
-        c.drawRect(new RectF(0, 0, getWidth(), border), p);
-        c.drawRect(new RectF(0, 0, border, getHeight()), p);
-        c.drawRect(new RectF(getWidth()-border, 0, getWidth(), getHeight()), p);
-        c.drawRect(new RectF(0, getHeight()-border, getWidth(), getHeight()), p);
-
-        return bm;
+    private fun drawRect(w: Int, h: Int): Bitmap {
+        val bm = Bitmap.createBitmap(w, h, Bitmap.Config.ARGB_8888)
+        val c = Canvas(bm)
+        val p = Paint(Paint.ANTI_ALIAS_FLAG)
+        p.color = coverColor
+        c.drawRect(
+            RectF(
+                border.toFloat(),
+                border.toFloat(),
+                (leftTopRadians + border).toFloat(),
+                (leftTopRadians + border).toFloat()
+            ), p
+        )
+        c.drawRect(
+            RectF(
+                border.toFloat(),
+                (height - leftBottomRadians - border).toFloat(),
+                (leftBottomRadians + border).toFloat(),
+                (height - border).toFloat()
+            ), p
+        )
+        c.drawRect(
+            RectF(
+                (width - rightTopRadians - border).toFloat(),
+                border.toFloat(),
+                (width - border).toFloat(),
+                (rightTopRadians + border).toFloat()
+            ), p
+        )
+        c.drawRect(
+            RectF(
+                (width - rightBottomRadians - border).toFloat(),
+                (height - rightBottomRadians - border).toFloat(),
+                (width - border).toFloat(),
+                (height - border).toFloat()
+            ), p
+        )
+        c.drawRect(RectF(0F, 0F, width.toFloat(), border.toFloat()), p)
+        c.drawRect(RectF(0F, 0F, border.toFloat(), height.toFloat()), p)
+        c.drawRect(RectF((width - border).toFloat(), 0F, width.toFloat(), height.toFloat()), p)
+        c.drawRect(RectF(0F, (height - border).toFloat(), width.toFloat(), height.toFloat()), p)
+        return bm
     }
 
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
-    @Override
-    protected void onDraw(Canvas canvas) {
-        super.onDraw(canvas);
+    override fun onDraw(canvas: Canvas) {
+        super.onDraw(canvas)
         try {
-            Paint paint = new Paint();
-            paint.setFilterBitmap(false);
-            paint.setStyle(Paint.Style.FILL);
+            val paint = Paint()
+            paint.isFilterBitmap = false
+            paint.style = Paint.Style.FILL
 
             //create a canvas layer to show the mix-result
-            @SuppressLint("WrongConstant") int sc = canvas.saveLayer(0, 0, getWidth(), getHeight(), null);
+            @SuppressLint("WrongConstant") val sc =
+                canvas.saveLayer(0f, 0f, width.toFloat(), height.toFloat(), null)
             //draw sector-dst-bitmap at first.
-            canvas.drawBitmap(drawSector(getWidth(), getHeight()), 0, 0, paint);
+            canvas.drawBitmap(drawSector(width, height), 0f, 0f, paint)
             //set Xfermode of paint.
-            paint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.SRC_OUT));
+            paint.xfermode = PorterDuffXfermode(PorterDuff.Mode.SRC_OUT)
             //then draw rect-src-bitmap
-            canvas.drawBitmap(drawRect(getWidth(), getHeight()), 0, 0, paint);
-            paint.setXfermode(null);
+            canvas.drawBitmap(drawRect(width, height), 0f, 0f, paint)
+            paint.xfermode = null
             //restore the canvas
-            canvas.restoreToCount(sc);
-        }catch (Error e){
-
+            canvas.restoreToCount(sc)
+        } catch (e: Error) {
         }
+    }
+
+    init {
+        val typedArray = context.obtainStyledAttributes(attrs, R.styleable.CircularCoverView)
+        leftTopRadians = typedArray.getDimensionPixelSize(
+            R.styleable.CircularCoverView_left_top_radius,
+            leftTopRadians
+        )
+        leftBottomRadians = typedArray.getDimensionPixelSize(
+            R.styleable.CircularCoverView_left_bottom_radius,
+            leftBottomRadians
+        )
+        rightTopRadians = typedArray.getDimensionPixelSize(
+            R.styleable.CircularCoverView_right_top_radius,
+            rightTopRadians
+        )
+        rightBottomRadians = typedArray.getDimensionPixelSize(
+            R.styleable.CircularCoverView_right_bottom_radius,
+            rightBottomRadians
+        )
+        coverColor = typedArray.getColor(R.styleable.CircularCoverView_cover_color, coverColor)
     }
 }

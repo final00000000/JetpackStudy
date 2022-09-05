@@ -6,7 +6,6 @@ import android.content.Context;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.text.TextUtils;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -37,7 +36,7 @@ public class C2CActivity extends Activity implements IEventListener, AdapterView
 
     private String mTargetId;
     private List<MessageBean> mDatas;
-    private MyChatroomListAdapter mAdapter;
+    private MyChatroomListAdapter mAdapter ;
 
 
     @Override
@@ -57,7 +56,7 @@ public class C2CActivity extends Activity implements IEventListener, AdapterView
         mDatas = new ArrayList<>();
 
         mTargetId = getIntent().getStringExtra("targetId");
-        ((TextView) findViewById(R.id.title_text)).setText(mTargetId);
+        ((TextView)findViewById(R.id.title_text)).setText(mTargetId);
         mAdapter = new MyChatroomListAdapter();
         vMsgList = (ListView) findViewById(R.id.msg_list);
         vMsgList.setTranscriptMode(ListView.TRANSCRIPT_MODE_ALWAYS_SCROLL);
@@ -67,26 +66,29 @@ public class C2CActivity extends Activity implements IEventListener, AdapterView
 
 
         vSendBtn = findViewById(R.id.send_btn);
-        vSendBtn.setOnClickListener(v -> {
-            String txt = vEditText.getText().toString();
-            if (!TextUtils.isEmpty(txt)) {
-                sendMsg(txt);
-                vEditText.setText("");
+        vSendBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                String txt = vEditText.getText().toString();
+                if(!TextUtils.isEmpty(txt)){
+                    sendMsg(txt);
+                    vEditText.setText("");
+                }
             }
         });
 
     }
 
-    private void sendMsg(String msg) {
+    private void sendMsg(String msg){
         XHIMMessage message = XHClient.getInstance().getChatManager().sendMessage(msg, mTargetId, new IXHResultCallback() {
             @Override
             public void success(Object data) {
-                Toast.makeText(C2CActivity.this, "成功" + data.toString(), Toast.LENGTH_SHORT).show();
+                MLOC.d("IM_C2C  成功","消息序号："+data);
             }
 
             @Override
             public void failed(String errMsg) {
-                Toast.makeText(C2CActivity.this, "失败" + errMsg, Toast.LENGTH_SHORT).show();
+                MLOC.d("IM_C2C  失败","消息序号："+errMsg);
             }
         });
 
@@ -96,7 +98,7 @@ public class C2CActivity extends Activity implements IEventListener, AdapterView
         historyBean.setLastMsg(message.contentData);
         historyBean.setConversationId(message.targetId);
         historyBean.setNewMsgCount(1);
-        MLOC.addHistory(historyBean, true);
+        MLOC.addHistory(historyBean,true);
 
         MessageBean messageBean = new MessageBean();
         messageBean.setConversationId(message.targetId);
@@ -105,57 +107,59 @@ public class C2CActivity extends Activity implements IEventListener, AdapterView
         messageBean.setFromId(message.fromId);
         MLOC.saveMessage(messageBean);
 
-        ColorUtils.getColor(this, message.fromId);
+        ColorUtils.getColor(this,message.fromId);
         mDatas.add(messageBean);
         mAdapter.notifyDataSetChanged();
     }
 
 
-    private void addListener() {
-        AEvent.addListener(AEvent.AEVENT_C2C_REV_MSG, this);
-        AEvent.addListener(AEvent.AEVENT_REV_SYSTEM_MSG, this);
+
+    private void addListener(){
+        AEvent.addListener(AEvent.AEVENT_C2C_REV_MSG,this);
+        AEvent.addListener(AEvent.AEVENT_REV_SYSTEM_MSG,this);
     }
 
     @Override
-    public void onRestart() {
+    public void onRestart(){
         super.onRestart();
         addListener();
     }
 
     @Override
-    public void onResume() {
+    public void onResume(){
         super.onResume();
         mDatas.clear();
-        List<MessageBean> list = MLOC.getMessageList(mTargetId);
-        if (list != null && list.size() > 0) {
+        List<MessageBean> list =  MLOC.getMessageList(mTargetId);
+        if(list!=null&&list.size()>0){
             mDatas.addAll(list);
         }
         mAdapter.notifyDataSetChanged();
     }
 
     @Override
-    public void onStop() {
-        AEvent.removeListener(AEvent.AEVENT_C2C_REV_MSG, this);
-        AEvent.removeListener(AEvent.AEVENT_REV_SYSTEM_MSG, this);
+    public void onStop(){
+        AEvent.removeListener(AEvent.AEVENT_C2C_REV_MSG,this);
+        AEvent.removeListener(AEvent.AEVENT_REV_SYSTEM_MSG,this);
         super.onStop();
     }
 
 
+
     @Override
     public void dispatchEvent(String aEventID, boolean success, final Object eventObj) {
-        MLOC.d("IM_C2C", aEventID + "||" + eventObj);
-        switch (aEventID) {
+        MLOC.d("IM_C2C",aEventID+"||"+eventObj);
+        switch (aEventID){
             case AEvent.AEVENT_C2C_REV_MSG:
             case AEvent.AEVENT_REV_SYSTEM_MSG:
                 final XHIMMessage revMsg = (XHIMMessage) eventObj;
-                if (revMsg.fromId.equals(mTargetId)) {
+                if(revMsg.fromId.equals(mTargetId)){
                     HistoryBean historyBean = new HistoryBean();
                     historyBean.setType(CoreDB.HISTORY_TYPE_C2C);
                     historyBean.setLastTime(new SimpleDateFormat("MM-dd HH:mm").format(new java.util.Date()));
                     historyBean.setLastMsg(revMsg.contentData);
                     historyBean.setConversationId(revMsg.fromId);
                     historyBean.setNewMsgCount(1);
-                    MLOC.addHistory(historyBean, true);
+                    MLOC.addHistory(historyBean,true);
 
                     MessageBean messageBean = new MessageBean();
                     messageBean.setConversationId(revMsg.fromId);
@@ -174,111 +178,109 @@ public class C2CActivity extends Activity implements IEventListener, AdapterView
         ClipboardManager cm = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
         // 将文本内容放到系统剪贴板里。
         cm.setText(mDatas.get(position).getMsg());
-        Toast.makeText(this, "消息已复制", Toast.LENGTH_LONG).show();
+        Toast.makeText(this,"消息已复制",Toast.LENGTH_LONG).show();
         return false;
     }
 
     public class MyChatroomListAdapter extends BaseAdapter {
         private LayoutInflater mInflater;
-
-        public MyChatroomListAdapter() {
+        public MyChatroomListAdapter(){
             mInflater = (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         }
-
         @Override
         public int getCount() {
-            if (mDatas == null) return 0;
+            if(mDatas ==null) return 0;
             return mDatas.size();
         }
 
         @Override
         public Object getItem(int position) {
-            if (mDatas == null)
+            if(mDatas ==null)
                 return null;
             return mDatas.get(position);
         }
 
         @Override
         public long getItemId(int position) {
-            if (mDatas == null)
+            if(mDatas ==null)
                 return 0;
             return position;
         }
 
         @Override
-        public int getViewTypeCount() {
+        public int getViewTypeCount(){
             return 2;
         }
 
         @Override
-        public int getItemViewType(int position) {
-            Log.e("TAG", "getItemViewType1: "+mDatas.get(position).getFromId() +"===="+MLOC.userId );
-            int i = -1;
+        public int getItemViewType(int position){
+            int id = -1;
             if(mDatas.get(position).getFromId()==null){
-                i = 0;
+                id = 0;
             }else{
-                i = mDatas.get(position).getFromId().equals(MLOC.userId) ? 0 : 1;
+                id =mDatas.get(position).getFromId().equals(MLOC.userId)?0:1;
             }
-            return i;
+            return id;
         }
 
         @Override
         public View getView(final int position, View convertView, ViewGroup parent) {
             int currLayoutType = getItemViewType(position);
-            if (currLayoutType == 0) { //自己的信息
+            if(currLayoutType == 0){ //自己的信息
                 final ViewHolder itemSelfHolder;
-                if (convertView == null) {
+                if(convertView == null){
                     itemSelfHolder = new ViewHolder();
-                    convertView = mInflater.inflate(R.layout.item_chat_msg_list_right, null);
+                    convertView = mInflater.inflate(R.layout.item_chat_msg_list_right,null);
                     itemSelfHolder.vUserId = (TextView) convertView.findViewById(R.id.item_user_id);
                     itemSelfHolder.vMsg = (TextView) convertView.findViewById(R.id.item_msg);
                     itemSelfHolder.vHeadBg = convertView.findViewById(R.id.head_bg);
                     itemSelfHolder.vHeadCover = (CircularCoverView) convertView.findViewById(R.id.head_cover);
                     itemSelfHolder.vHeadImage = (ImageView) convertView.findViewById(R.id.head_img);
                     convertView.setTag(itemSelfHolder);
-                } else {
-                    itemSelfHolder = (ViewHolder) convertView.getTag();
+                }else{
+                    itemSelfHolder = (ViewHolder)convertView.getTag();
                 }
                 itemSelfHolder.vUserId.setText(mDatas.get(position).getFromId());
                 itemSelfHolder.vMsg.setText(mDatas.get(position).getMsg());
-                itemSelfHolder.vHeadBg.setBackgroundColor(ColorUtils.getColor(C2CActivity.this, mDatas.get(position).getFromId()));
+                itemSelfHolder.vHeadBg.setBackgroundColor(ColorUtils.getColor(C2CActivity.this,mDatas.get(position).getFromId()));
                 itemSelfHolder.vHeadCover.setCoverColor(Color.parseColor("#f6f6f6"));
-                int cint = DensityUtils.dip2px(C2CActivity.this, 20);
-                itemSelfHolder.vHeadCover.setRadians(cint, cint, cint, cint, 0);
+                int cint = DensityUtils.Companion.dip2px(C2CActivity.this,20);
+                itemSelfHolder.vHeadCover.setRadians(cint, cint, cint, cint,0);
                 itemSelfHolder.vHeadImage.setImageResource(R.drawable.head_icon_1);
-            } else if (currLayoutType == 1) {//别人的信息
+            }else if(currLayoutType == 1){//别人的信息
                 final ViewHolder itemOtherHolder;
-                if (convertView == null) {
+                if(convertView == null){
                     itemOtherHolder = new ViewHolder();
-                    convertView = mInflater.inflate(R.layout.item_chat_msg_list_left, null);
+                    convertView = mInflater.inflate(R.layout.item_chat_msg_list_left,null);
                     itemOtherHolder.vUserId = (TextView) convertView.findViewById(R.id.item_user_id);
                     itemOtherHolder.vMsg = (TextView) convertView.findViewById(R.id.item_msg);
                     itemOtherHolder.vHeadBg = convertView.findViewById(R.id.head_bg);
                     itemOtherHolder.vHeadCover = (CircularCoverView) convertView.findViewById(R.id.head_cover);
                     itemOtherHolder.vHeadImage = (ImageView) convertView.findViewById(R.id.head_img);
                     convertView.setTag(itemOtherHolder);
-                } else {
-                    itemOtherHolder = (ViewHolder) convertView.getTag();
+                }else{
+                    itemOtherHolder = (ViewHolder)convertView.getTag();
                 }
                 itemOtherHolder.vUserId.setText(mDatas.get(position).getFromId());
                 itemOtherHolder.vMsg.setText(mDatas.get(position).getMsg());
-                itemOtherHolder.vHeadBg.setBackgroundColor(ColorUtils.getColor(C2CActivity.this, mDatas.get(position).getFromId()));
+                itemOtherHolder.vHeadBg.setBackgroundColor(ColorUtils.getColor(C2CActivity.this,mDatas.get(position).getFromId()));
                 itemOtherHolder.vHeadCover.setCoverColor(Color.parseColor("#f6f6f6"));
-                int cint = DensityUtils.dip2px(C2CActivity.this, 20);
-                itemOtherHolder.vHeadCover.setRadians(cint, cint, cint, cint, 0);
+                int cint = DensityUtils.Companion.dip2px(C2CActivity.this,20);
+                itemOtherHolder.vHeadCover.setRadians(cint, cint, cint, cint,0);
                 itemOtherHolder.vHeadImage.setImageResource(R.drawable.head_icon_2);
             }
             return convertView;
         }
     }
 
-    public class ViewHolder {
+    public class ViewHolder{
         public TextView vUserId;
         public TextView vMsg;
         public View vHeadBg;
         public CircularCoverView vHeadCover;
         public ImageView vHeadImage;
     }
+
 
 
 }

@@ -22,6 +22,8 @@ public class CoreDB implements IEventListener {
     public CoreDB(){
         AEvent.removeListener(AEvent.AEVENT_RESET,this);
         AEvent.addListener(AEvent.AEVENT_RESET,this);
+        MLOC.d(TEXTTAG,"reset DB:"+MLOC.userId);
+
         coreDBM.initCoreDB(APP_DB_PATH +"databases/", MLOC.userId);
         //历史表
         coreDBM.execSQL("create table if not exists "+HISTORY_TABLE+"(" +

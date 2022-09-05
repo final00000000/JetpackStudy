@@ -1,50 +1,45 @@
-package com.example.jetpackstudy.im;
+package com.example.jetpackstudy.im
 
-import com.starrtc.starrtcsdk.apiInterface.IXHChatManagerListener;
-import com.starrtc.starrtcsdk.core.im.message.XHIMMessage;
+import com.example.jetpackstudy.im.AEvent.notifyListener
+import com.example.jetpackstudy.im.MLOC.addHistory
+import com.example.jetpackstudy.im.MLOC.saveMessage
+import com.starrtc.starrtcsdk.apiInterface.IXHChatManagerListener
+import com.starrtc.starrtcsdk.core.im.message.XHIMMessage
+import java.text.SimpleDateFormat
+import java.util.*
 
-import java.text.SimpleDateFormat;
-
-public class XHChatManagerListener implements IXHChatManagerListener {
-    @Override
-    public void onReceivedMessage(XHIMMessage message) {
-
-        HistoryBean historyBean = new HistoryBean();
-        historyBean.setType(CoreDB.HISTORY_TYPE_C2C);
-        historyBean.setLastTime(new SimpleDateFormat("MM-dd HH:mm").format(new java.util.Date()));
-        historyBean.setLastMsg(message.contentData);
-        historyBean.setConversationId(message.fromId);
-        historyBean.setNewMsgCount(1);
-        MLOC.addHistory(historyBean,false);
-
-        MessageBean messageBean = new MessageBean();
-        messageBean.setConversationId(message.fromId);
-        messageBean.setTime(new SimpleDateFormat("MM-dd HH:mm").format(new java.util.Date()));
-        messageBean.setMsg(message.contentData);
-        messageBean.setFromId(message.fromId);
-        MLOC.saveMessage(messageBean);
-
-        AEvent.notifyListener(AEvent.AEVENT_C2C_REV_MSG,true,message);
-
+class XHChatManagerListener : IXHChatManagerListener {
+    override fun onReceivedMessage(message: XHIMMessage) {
+        val historyBean = HistoryBean()
+        historyBean.type = CoreDB.HISTORY_TYPE_C2C
+        historyBean.lastTime = SimpleDateFormat("MM-dd HH:mm").format(Date())
+        historyBean.lastMsg = message.contentData
+        historyBean.conversationId = message.fromId
+        historyBean.newMsgCount = 1
+        addHistory(historyBean, false)
+        val messageBean = MessageBean()
+        messageBean.conversationId = message.fromId
+        messageBean.time = SimpleDateFormat("MM-dd HH:mm").format(Date())
+        messageBean.msg = message.contentData
+        messageBean.fromId = message.fromId
+        saveMessage(messageBean)
+        notifyListener(AEvent.AEVENT_C2C_REV_MSG, true, message)
     }
 
-    @Override
-    public void onReceivedSystemMessage(XHIMMessage message) {
-        HistoryBean historyBean = new HistoryBean();
-        historyBean.setType(CoreDB.HISTORY_TYPE_C2C);
-        historyBean.setLastTime(new SimpleDateFormat("MM-dd HH:mm").format(new java.util.Date()));
-        historyBean.setLastMsg(message.contentData);
-        historyBean.setConversationId(message.fromId);
-        historyBean.setNewMsgCount(1);
-        MLOC.addHistory(historyBean,false);
-
-        MessageBean messageBean = new MessageBean();
-        messageBean.setConversationId(message.fromId);
-        messageBean.setTime(new SimpleDateFormat("MM-dd HH:mm").format(new java.util.Date()));
-        messageBean.setMsg(message.contentData);
-        messageBean.setFromId(message.fromId);
-        MLOC.saveMessage(messageBean);
-
-        AEvent.notifyListener(AEvent.AEVENT_REV_SYSTEM_MSG,true,message);
+    override fun onReceivedSystemMessage(message: XHIMMessage) {
+        val historyBean = HistoryBean()
+        historyBean.type = CoreDB.HISTORY_TYPE_C2C
+        historyBean.lastTime = SimpleDateFormat("MM-dd HH:mm").format(Date())
+        historyBean.lastMsg = message.contentData
+        historyBean.conversationId = message.fromId
+        historyBean.newMsgCount = 1
+        addHistory(historyBean, false)
+        val messageBean = MessageBean()
+        messageBean.conversationId = message.fromId
+        messageBean.time = SimpleDateFormat("MM-dd HH:mm").format(Date())
+        messageBean.msg = message.contentData
+        messageBean.fromId = message.fromId
+        saveMessage(messageBean)
+        notifyListener(AEvent.AEVENT_REV_SYSTEM_MSG, true, message)
     }
 }

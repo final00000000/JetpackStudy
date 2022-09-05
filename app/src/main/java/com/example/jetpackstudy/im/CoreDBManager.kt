@@ -1,71 +1,74 @@
-package com.example.jetpackstudy.im;
+package com.example.jetpackstudy.im
 
-import android.database.Cursor;
-import android.database.SQLException;
-import android.database.sqlite.SQLiteDatabase;
-
-import java.io.File;
+import android.database.Cursor
+import android.database.SQLException
+import android.database.sqlite.SQLiteDatabase
+import java.io.File
+import java.lang.Exception
+import kotlin.jvm.Synchronized
+import kotlin.Throws
 
 /**
  * Created by xuas on 2015/5/11.
  */
-public class CoreDBManager {
-    private SQLiteDatabase coredb = null;
-    private Integer dblock = 0;
-    public synchronized void initCoreDB(String coreDBPath, String userid) {
-        if(coredb == null) {
-            File file = new File(coreDBPath);
+class CoreDBManager {
+    private var coredb: SQLiteDatabase? = null
+    private val dblock = 0
+    @Synchronized
+    fun initCoreDB(coreDBPath: String, userid: String) {
+        if (coredb == null) {
+            val file = File(coreDBPath)
             if (!file.exists()) {
-                file.mkdirs();
+                file.mkdirs()
             }
-            coredb = SQLiteDatabase.openOrCreateDatabase(coreDBPath+"coredb_" + userid + ".db", null);
+            coredb =
+                SQLiteDatabase.openOrCreateDatabase(coreDBPath + "coredb_" + userid + ".db", null)
         }
     }
 
-    public void execSQL(String sql) throws SQLException {
-        synchronized (dblock){
+    @Throws(SQLException::class)
+    fun execSQL(sql: String?) {
+        synchronized(dblock) {
             try {
-                coredb.execSQL(sql);
-            }catch (SQLException e){
-                throw e;
+                coredb!!.execSQL(sql)
+            } catch (e: SQLException) {
+                throw e
             }
         }
     }
 
-    public void execSQL(String sql, Object[] bindArgs) throws SQLException {
-        synchronized (dblock){
+    @Throws(SQLException::class)
+    fun execSQL(sql: String?, bindArgs: Array<Any?>?) {
+        synchronized(dblock) {
             try {
-                coredb.execSQL(sql,bindArgs);
-            }catch (SQLException e){
-                throw e;
+                coredb!!.execSQL(sql, bindArgs)
+            } catch (e: SQLException) {
+                throw e
             }
         }
     }
 
-    public Cursor rawQuery(String sql, String[] selectionArgs) {
-        Cursor cursor = null;
+    fun rawQuery(sql: String?, selectionArgs: Array<String?>?): Cursor? {
+        var cursor: Cursor? = null
         try {
-            cursor = coredb.rawQuery(sql, selectionArgs);
+            cursor = coredb!!.rawQuery(sql, selectionArgs)
             //如果table不存在，cursor有可能返回null，也有可能返回非null，但调用moveToNext或获取count时会抛出表不存在的错误
             //这里使用下面的方法判断cursor是否有效
-            if(cursor.getCount() <= 0){
-                cursor = null;
+            if (cursor.count <= 0) {
+                cursor = null
             }
-        }catch (Exception e){
-            cursor = null;
+        } catch (e: Exception) {
+            cursor = null
         }
-
-
-        return cursor;
+        return cursor
     }
 
-    public void close(){
-        synchronized (dblock){
-            if(coredb != null) {
-                coredb.close();
-                coredb = null;
+    fun close() {
+        synchronized(dblock) {
+            if (coredb != null) {
+                coredb!!.close()
+                coredb = null
             }
         }
     }
-
 }
