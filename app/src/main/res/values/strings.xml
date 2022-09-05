@@ -1,0 +1,7 @@
+<resources>
+    <string name="app_name">JetpackStudy</string>
+    <string-array name="head_images">
+    <item>@drawable/head_icon_1</item>
+    <item>@drawable/head_icon_2</item>
+    </string-array>
+</resources>
